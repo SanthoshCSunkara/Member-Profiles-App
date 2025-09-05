@@ -1,3 +1,4 @@
+// src/webparts/memberProfiles/components/MemberProfiles.tsx
 import * as React from 'react';
 import styles from './MemberProfiles.module.scss';
 import { SearchBox, ISearchBoxStyles } from '@fluentui/react/lib/SearchBox';
@@ -5,14 +6,19 @@ import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
 import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
 import { MemberCard } from './MemberCard';
 import { DetailsPanel } from './DetailsPanel';
-import type { IProfileItem, IMemberProfilesProps } from '../models';
+import type { IProfileItem } from '../models';
 import { SpService } from '../services/SpService';
 import type { WebPartContext } from '@microsoft/sp-webpart-base';
+import type { IMemberProfilesProps } from './IMemberProfilesProps';
 
-interface IComponentProps extends IMemberProfilesProps { context: WebPartContext; }
+interface IComponentProps extends IMemberProfilesProps {
+  context: WebPartContext;
+}
+
+const norm = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export const MemberProfiles: React.FC<IComponentProps> = (props) => {
-  const { listId, itemsPerPage, accentColor, context } = props;
+  const { listId, imageListId, itemsPerPage, accentColor, context } = props;
 
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
@@ -27,26 +33,49 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
     let mounted = true;
     setLoading(true);
     setError(undefined);
-    service.getProfiles(listId)
-      .then((data) => { if (!mounted) return; setItems(data); setLoading(false); })
+
+    Promise.all([
+      service.getProfiles(listId),
+      service.getImageMap(imageListId)
+    ])
+      .then(([profiles, imageMap]) => {
+        if (!mounted) return;
+        const merged: IProfileItem[] = [];
+        for (let i = 0; i < profiles.length; i++) {
+          const p = profiles[i];
+          const k = norm(p.name);
+          const photo = imageMap[k];
+          merged.push({ ...p, photoUrl: photo || p.photoUrl });
+        }
+        setItems(merged);
+        setLoading(false);
+      })
       .catch((e) => { if (!mounted) return; setError(e?.message || 'Load failed'); setLoading(false); });
+
     return () => { mounted = false; };
-  }, [listId, service]);
+  }, [listId, imageListId, service]);
 
   const normalized = React.useMemo(() => items.map((i) => ({ ...i, key: i.id })), [items]);
 
   const filtered = React.useMemo(() => {
     const n = searchName.trim().toLowerCase();
     const r = searchRole.trim().toLowerCase();
-    return normalized.filter((i) => {
-      const byName = !n || ((i.name || '').toLowerCase().indexOf(n) > -1);
-      const byRole = !r || ((i.role || '').toLowerCase().indexOf(r) > -1);
-      return byName && byRole;
-    });
+    const out: IProfileItem[] = [];
+    for (let i = 0; i < normalized.length; i++) {
+      const it = normalized[i];
+      const byName = !n || ((it.name || '').toLowerCase().indexOf(n) > -1);
+      const byRole = !r || ((it.role || '').toLowerCase().indexOf(r) > -1);
+      if (byName && byRole) out.push(it);
+    }
+    return out;
   }, [normalized, searchName, searchRole]);
 
+  // 0 or undefined => show ALL
   const page = React.useMemo(
-    () => filtered.slice(0, itemsPerPage || 9999),
+    () => {
+      const cap = (itemsPerPage && itemsPerPage > 0) ? itemsPerPage : filtered.length;
+      return filtered.slice(0, cap);
+    },
     [filtered, itemsPerPage]
   );
 
@@ -96,3 +125,5 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
     </div>
   );
 };
+
+export default MemberProfiles;

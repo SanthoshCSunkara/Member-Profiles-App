@@ -9,35 +9,47 @@ interface Props {
   onClick: (item: IProfileItem) => void;
 }
 
-/** Primary preview: try modern width/height query */
-const buildPrimary = (url: string, w: number, h: number) => {
-  const sep = url.indexOf('?') > -1 ? '&' : '?';
-  return `${url}${sep}width=${w}&height=${h}&mode=crop`;
+const AVATAR = 112; // retina-crisp (your CSS still shows 56x56)
+
+/** Safely append width/height/mode to any URL */
+const buildPrimary = (raw: string, w: number, h: number) => {
+  try {
+    const u = new URL(raw, window.location.origin);
+    u.searchParams.set('width', String(w));
+    u.searchParams.set('height', String(h));
+    u.searchParams.set('mode', 'crop');
+    return u.toString();
+  } catch {
+    // if URL() fails, fall back to your original heuristic
+    const sep = raw.indexOf('?') > -1 ? '&' : '?';
+    return `${raw}${sep}width=${w}&height=${h}&mode=crop`;
+  }
 };
 
-/** Fallback preview: SharePoint preview handler (closest to list-formatting getThumbnailImage) */
-const buildFallback = (url: string, w: number, h: number) =>
-  `/_layouts/15/getpreview.ashx?path=${encodeURIComponent(url)}&width=${w}&height=${h}`;
+/** SP preview handler (closest to list-formatting getThumbnailImage) */
+const buildFallback = (raw: string, w: number, h: number) =>
+  `/_layouts/15/getpreview.ashx?path=${encodeURIComponent(raw)}&width=${w}&height=${h}`;
 
 export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
   const baseUrl = item.photoUrl || '';
+
   const [src, setSrc] = React.useState<string | undefined>(() =>
-    baseUrl ? buildPrimary(baseUrl, 96, 96) : undefined
+    baseUrl ? buildPrimary(baseUrl, AVATAR, AVATAR) : undefined
   );
-  const [triedFallback, setTriedFallback] = React.useState(false);
+  const [usedFallback, setUsedFallback] = React.useState(false);
 
   React.useEffect(() => {
-    setSrc(baseUrl ? buildPrimary(baseUrl, 96, 96) : undefined);
-    setTriedFallback(false);
+    setSrc(baseUrl ? buildPrimary(baseUrl, AVATAR, AVATAR) : undefined);
+    setUsedFallback(false);
   }, [baseUrl, item.id]);
 
   const handleError = () => {
     if (!baseUrl) return;
-    if (!triedFallback) {
-      setSrc(buildFallback(baseUrl, 96, 96)); // try SP preview pipeline
-      setTriedFallback(true);
+    if (!usedFallback) {
+      setSrc(buildFallback(baseUrl, AVATAR, AVATAR));
+      setUsedFallback(true);
     } else {
-      setSrc(undefined); // show color block
+      setSrc(undefined); // show solid block; no further retries
     }
   };
 
@@ -52,9 +64,14 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
       <div className={styles.row}>
         <div className={styles.avatar}>
           {src ? (
-            <img src={src} alt="" loading="lazy" onError={handleError} />
+            <img
+              src={src}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onError={handleError}
+            />
           ) : (
-            // Solid color block fallback (no letter), to match your JSON
             <span aria-hidden="true" />
           )}
         </div>
@@ -62,7 +79,7 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
         <div className={styles.meta}>
           <div className={styles.name}>{item.name}</div>
           {item.role && <div className={styles.role}>{item.role}</div>}
-          <div className={styles.viewMoreInline}>View more details…</div>
+          
         </div>
       </div>
     </button>

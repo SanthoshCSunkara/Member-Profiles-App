@@ -1,4 +1,3 @@
-// src/webparts/memberProfiles/services/SpService.ts
 import { spfi, SPFx } from '@pnp/sp';
 import type { SPFI } from '@pnp/sp';
 import '@pnp/sp/webs';
@@ -13,73 +12,42 @@ export class SpService {
     this._sp = spfi().using(SPFx(this._context));
   }
 
+  /** Data lists (Custom List) */
   public async getLists(): Promise<Array<{ key: string; text: string }>> {
-    const lists = await this._sp.web.lists
-      .select('Id','Title','BaseTemplate','Hidden')()
-      .then(ls => ls.filter(l => l.BaseTemplate === 100 && !l.Hidden));
-    return lists.map(l => ({ key: l.Id, text: l.Title }));
+    const all = await this._sp.web.lists.select('Id','Title','BaseTemplate','Hidden')();
+    const out: Array<{ key: string; text: string }> = [];
+    for (let i = 0; i < all.length; i++) {
+      const l = all[i];
+      if (l.BaseTemplate === 100 && !l.Hidden) out.push({ key: l.Id, text: l.Title });
+    }
+    return out;
   }
 
+  /** Image libraries (Document=101, Picture=109) */
+  public async getImageLibraries(): Promise<Array<{ key: string; text: string }>> {
+    const all = await this._sp.web.lists.select('Id','Title','BaseTemplate','Hidden')();
+    const out: Array<{ key: string; text: string }> = [];
+    for (let i = 0; i < all.length; i++) {
+      const l = all[i];
+      // 101: Document Library, 109: Picture Library
+      if ((l.BaseTemplate === 101 || l.BaseTemplate === 109) && !l.Hidden) {
+        out.push({ key: l.Id, text: l.Title });
+      }
+    }
+    return out;
+  }
+
+  /** Profiles from the selected data list (no images here on purpose) */
   public async getProfiles(listId: string): Promise<IProfileItem[]> {
     if (!listId) return [];
-
-    // IMPORTANT: only select Image0 (your list doesn’t have "Image")
-    const select = [
-      'Id','Title','Role','Hire_x0020_Date','Birthday',
-      'CompanyProfile','LinkedIn','Image0','About',
-      'Modified','Created'
-    ].join(',');
-
     const rows: IProfileItemRaw[] = await this._sp.web.lists
       .getById(listId)
-      .items.select(select)
+      .items
+      .select(
+        'Id','Title','Role','Hire_x0020_Date','Birthday',
+        'CompanyProfile','LinkedIn','About','Modified','Created'
+      )
       .top(5000)();
-
-    const origin = new URL(this._context.pageContext.web.absoluteUrl).origin;
-
-    const mapUrl = (v: any): string | undefined => {
-      if (!v) return undefined;
-      if (typeof v === 'string') return v;
-      if (v.Url) return v.Url;
-      if (v.url) return v.url;
-      if (v.serverUrl && v.serverRelativeUrl) return v.serverUrl + v.serverRelativeUrl;
-      if (v.ServerUrl && v.ServerRelativeUrl) return v.ServerUrl + v.ServerRelativeUrl;
-      return undefined;
-    };
-
-    // Robust resolver for Image (Thumbnail) column; ES5-safe
-    const mapImage = (img: any): string | undefined => {
-      if (!img) return undefined;
-      const v = Array.isArray(img) ? img[0] : img;
-
-      const shapeToUrl = (o: any): string | undefined => {
-        if (!o) return undefined;
-        const su = o.serverUrl || o.ServerUrl;
-        const sr = o.serverRelativeUrl || o.ServerRelativeUrl;
-        const u  = o.Url || o.url;
-        if (su && sr) return su + sr;
-        if (u) return u;
-        if (sr) return origin + sr;
-        if (typeof o.path === 'string') {
-          return o.path && o.path.charAt(0) === '/' ? origin + o.path : o.path;
-        }
-        return undefined;
-      };
-
-      if (typeof v === 'string') {
-        try {
-          const j = JSON.parse(v);
-          const u = shapeToUrl(j);
-          if (u) return u;
-        } catch {
-          if (/^https?:/i.test(v)) return v;
-          if (v && v.charAt(0) === '/') return origin + v;
-        }
-        return undefined;
-      }
-
-      return shapeToUrl(v);
-    };
 
     const formatDate = (d?: string | Date): string | undefined => {
       if (!d) return undefined;
@@ -88,20 +56,66 @@ export class SpService {
       return date.toLocaleDateString();
     };
 
-    return rows.map((i: any) => {
-      const imgSource = (i as any).Image0; // <- use Image0 only
+    const mapUrl = (v: any): string | undefined => {
+      if (!v) return undefined;
+      if (typeof v === 'string') return v;
+      if (v.Url) return v.Url;
+      if (v.url) return v.url;
+      return undefined;
+    };
 
-      return {
-        id: i.Id,
-        name: i.Title,
-        role: i.Role || '',
-        hireDate: formatDate(i.Hire_x0020_Date),
-        birthday: i.Birthday || undefined,
-        companyUrl: mapUrl(i.CompanyProfile),
-        linkedInUrl: mapUrl(i.LinkedIn),
-        photoUrl: mapImage(imgSource),
-        detailsHtml: i.About || undefined
-      } as IProfileItem;
-    });
+    const items: IProfileItem[] = [];
+    for (let i = 0; i < rows.length; i++) {
+      const r: any = rows[i];
+      items.push({
+        id: r.Id,
+        name: r.Title,
+        role: r.Role || '',
+        hireDate: formatDate(r.Hire_x0020_Date),
+        birthday: r.Birthday || undefined,
+        companyUrl: mapUrl(r.CompanyProfile),
+        linkedInUrl: mapUrl(r.LinkedIn),
+        photoUrl: undefined,          // will be filled by image map
+        detailsHtml: r.About || undefined
+      });
+    }
+    return items;
+  }
+
+  /** Build a name->absoluteUrl map from the selected image library */
+  public async getImageMap(imageListId?: string): Promise<{ [key: string]: string }> {
+    const map: { [key: string]: string } = {};
+    if (!imageListId) return map;
+
+    const origin = new URL(this._context.pageContext.web.absoluteUrl).origin;
+
+    // FileRef = server relative path; Title may be filled in library
+    const rows: Array<{ Title?: string; FileRef: string }> = await this._sp.web.lists
+      .getById(imageListId)
+      .items
+      .select('Id','Title','FileRef')
+      .top(5000)();
+
+    const norm = (s?: string): string =>
+      (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    const fileBase = (ref: string): string => {
+      // get filename without extension
+      const slash = ref.lastIndexOf('/');
+      const name = slash >= 0 ? ref.substring(slash + 1) : ref;
+      const dot = name.lastIndexOf('.');
+      const base = dot > 0 ? name.substring(0, dot) : name;
+      return norm(base);
+    };
+
+    for (let i = 0; i < rows.length; i++) {
+      const it = rows[i];
+      const absolute = origin + it.FileRef;
+      const k1 = norm(it.Title);
+      const k2 = fileBase(it.FileRef);
+      if (k1) map[k1] = absolute;
+      if (k2) map[k2] = absolute;
+    }
+    return map;
   }
 }

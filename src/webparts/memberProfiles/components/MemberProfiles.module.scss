@@ -1,81 +1,208 @@
 @use 'sass:color';
-@import '~@fluentui/react/dist/sass/References.scss';
 
 :root { --accent: #114461; }
 
+.memberProfiles { overflow: hidden; padding: 1em; }
+
 .wrapper { padding: 8px 0 0; }
 
-.container { max-width: 1100px; margin: 0 auto; }
-
-.headingWrap { text-align: center; margin: 0 0 8px; }
-.heading { font-size: 42px; font-weight: 800; color: #f57c00; line-height: 1.2; margin: 0; }
-.subtitle { font-size: 20px; color: #1565c0; margin: 6px 0 16px; }
-
-.searchRow { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 12px; margin: 10px auto 18px; max-width: 1100px; }
-
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: stretch; }
-
-.card { border: 1px solid #edf2f7; border-radius: 12px; background: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,.06); transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease; cursor: pointer; overflow: hidden; text-align: left; }
-.card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.10); border-color: #f57c00; background: #fff3e0; }
-.cardActive { outline: 2px solid var(--accent); box-shadow: 0 10px 22px rgba(17,68,97,.25); }
-
-.row { display: flex; gap: 12px; padding: 10px 12px; align-items: center; }
-.avatar { width: 56px; height: 56px; border-radius: 50%; background: #2d3748; color: #fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 18px; overflow: hidden; }
-.avatar img { width: 100%; height:100%; object-fit: cover; }
-
-.meta { min-width: 0; display:flex; flex-direction: column; gap: 2px; }
-.name { font-weight: 700; font-size: 16px; color: color.adjust(#114461, $lightness: -2%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.role { font-size: 13px; color: #5a6a7a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.links { padding: 0 12px 12px; display:flex; gap:8px; flex-wrap: wrap; }
-.viewMore { font-weight: 700; color: #f57c00; }
-.viewMoreInline { font-weight: 700; color: #f57c00; font-size: 13px; margin-top: 4px; }
-.viewMore { font-weight: 700; color: #f57c00; }
-.linkBtn { border: 1px solid var(--accent); border-radius: 999px; padding: 4px 10px; font-weight: 600; font-size:12px; background: #D6EAF7; color: var(--accent); text-decoration: none; }
-
-/* Modal */
-.modalContainer { max-width: 980px; width: calc(100% - 40px); margin: 40px auto; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
-.modalHeader { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid #edf2f7; }
-.modalTitle { font-size: 24px; font-weight: 800; color: #114461; }
-.modalBody { display:grid; grid-template-columns: 320px 1fr; gap: 20px; padding: 16px; }
-.modalLeft { align-self: start; min-width: 0; }
-.modalRight { min-width: 0; }
-.modalCard { border: 1px solid #e5e7eb; border-radius: 12px; background:#fff; padding: 12px; }
-.modalName { text-align:center; font-weight:800; font-size:18px; color:#114461; }
-.modalRole { text-align:center; font-weight:600; color:#114461; }
-.modalMeta { display:flex; justify-content:center; gap:12px; color:#114461; margin: 6px 0 10px; }
-.modalImage { width: 100%; border-radius: 12px; }
-.modalRight { min-width: 0; }
-
-.detailsTitle { color: var(--accent); font-weight: 800; }
-.detailsHeader { border-bottom: 1px solid #edf2f7; padding-bottom: 8px; margin-bottom: 8px; }
-.detailsMeta { display:flex; flex-wrap: wrap; gap:12px; color:#355; }
-.detailsHtml p { margin: 0 0 10px; }
-/* src/webparts/memberProfiles/components/MemberProfiles.module.scss */
-
-:root {
-  --accent: #114461;
-  /* Add a crisp, readable sans font stack */
-  --fontSans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
-              "Segoe UI Variable Text", "Inter", "Helvetica Neue", Arial, sans-serif;
-}
-
-/* Apply across the web part */
-.wrapper {
-  font-family: var(--fontSans);
+/* --- Global text rendering for clarity --- */
+.wrapper, .modalContainer {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  color: #0f2135;
 }
 
-/* Headings cleaner & bolder */
-.heading {
-  font-family: var(--fontSans);
-  font-weight: 800;
+/* --- Header --- */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 12px; }
+.headingWrap { display: grid; justify-items: center; gap: 6px; margin-bottom: 10px; }
+.heading { 
+  margin: 0; 
+  font-weight: 800; 
+  color: var(--accent); 
+  font-size: clamp(28px, 4vw, 42px); 
+  line-height: 1.1; 
+  text-align: center; 
+}
+.subtitle { 
+  color: #2f5e86; 
+  font-size: clamp(14px, 2.4vw, 20px); 
+  text-align: center; 
+}
+
+/* --- Search --- */
+.searchRow { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 12px; width: 100%; }
+
+/* --- Cards grid --- */
+.grid {
+  max-width: 1200px; margin: 12px auto; padding: 0 12px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px; align-items: stretch;
+}
+
+/* ===== CARD ===== */
+.card {
+  position: relative;
+  border: 1px solid #e6eef6;         /* subtle default */
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+}
+
+/* Orange hover highlight */
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.10);
+  border-color: #f7c391;
+  background-color: #fff7ed; /* warm but light */
+}
+
+/* Selected/active state – clear orange outline */
+.cardActive {
+  outline: 3px solid #f07f17;
+  outline-offset: 0;
+  background-color: #fff7ed;
+  box-shadow: 0 10px 22px rgba(240,127,23,.15);
+}
+/* Keyboard focus inside the card */
+.card:focus,
+.card:focus-within {
+  outline: 3px solid #f07f17;
+  outline-offset: 0;
+}
+
+.row { display: flex; gap: 12px; padding: 12px 14px; align-items: center; }
+
+/* avatar stays crisp and circular */
+.avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #2d3748; overflow: hidden; flex: 0 0 56px;
+}
+.avatar img { width: 100%; height:100%; object-fit: cover; display:block; }
+
+/* ===== TYPOGRAPHY IN CARD ===== */
+.meta { min-width: 0; display:flex; flex-direction: column; gap: 4px; }
+
+/* Names: lighter weight + responsive size + higher contrast */
+.name {
+  font-weight: 700;                        /* was 800 – easier to read */
+  color: #0f2135;                          /* higher contrast */
+  font-size: clamp(16px, 1.6vw, 20px);     /* responsive */
+  line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   letter-spacing: .2px;
 }
 
-/* Card typography tweaks */
-.name { font-weight: 700; letter-spacing: .1px; }
-.role { font-weight: 500; color: #334155; }         /* darker, higher contrast */
-.viewMoreInline { font-weight: 700; letter-spacing: .1px; }
+/* Role: slightly larger & responsive */
+.role {
+  font-size: clamp(13px, 1.2vw, 16px);
+  color: #5a6a7a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* “View more details…” inline hint */
+.viewMoreInline {
+  margin-top: 4px;
+  font-weight: 700;
+  color: #f07f17;
+  font-size: clamp(12px, 1.1vw, 14px);
+}
+/* --- Modal --- */
+.modalContainer {
+  width: min(1120px, 96vw);
+  margin: 5vh auto;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,.18);
+  max-height: 90vh;
+}
+
+.modalHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid #edf2f7;
+}
+.modalTitle {
+  font-weight: 800; color: var(--accent);
+  font-size: clamp(20px, 2.5vw, 28px); line-height: 1.2;
+}
+
+.modalBody {
+  display: grid; grid-template-columns: 340px 1fr;
+  gap: 24px; padding: 16px;
+}
+@media (max-width: 900px) {
+  .modalBody { grid-template-columns: 1fr; }
+}
+
+/* Left column card */
+.modalLeft { 
+  min-width: 0;     /* allows content to shrink in CSS grid */
+  overflow: hidden; /* guards against accidental overflow */
+}
+.modalCard {
+  border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  background: #fff;
+}
+.modalName { font-weight: 800; font-size: clamp(18px, 2.4vw, 22px); color: #0f2135; text-align: center; }
+.modalRole { font-size: 14px; color: #5a6a7a; text-align: center; margin-top: 2px; }
+
+.modalMeta { 
+  margin: 10px 0 12px; display:flex; flex-wrap: wrap; gap:10px; justify-content:center; color:#355; 
+  font-size: 14px; 
+}
+.modalMeta :global(.ms-Icon) { margin-right: 6px; }
+
+/* Buttons (Company Profile / LinkedIn) */
+.btnRow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 4px 0 10px; }
+.btnGhost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px; text-decoration: none;
+  border: 1px solid var(--accent); color: var(--accent); background: #fbfbfc;
+  font-weight: 700; font-size: 13px;
+}
+.btnGhost:hover { filter: brightness(0.95); }
+
+/* Photo: clear & responsive (no blur) */
+.modalImage {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin-top: 10px;
+  /* If a very tall image, cap height to avoid soft scaling */
+  max-height: 420px;
+  object-fit: cover;
+}
+
+/* Right column rich text */
+/* Right column wrapper: not empty + prevents text overflow in grid */
+.modalRight {
+  min-width: 0;     /* allows content to shrink in CSS grid */
+  overflow: hidden; /* guards against accidental overflow */
+}
+
+.detailsHtml {
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.65;
+  color: #0f2135;
+}
+.detailsHtml :global(h3),
+.detailsHtml :global(h4) {
+  color: var(--accent);
+  margin: 14px 0 8px;
+  font-weight: 800;
+}
+.detailsHtml :global(p) { margin: 0 0 12px; }
+.detailsHtml :global(ul) { margin: 0 0 12px; padding-left: 22px; }
+.detailsHtml :global(li) { margin: 4px 0; }
+
+/* Small utility (kept from your earlier file) */
+.title { font-size: 24px; font-weight: 700; color: var(--accent); }

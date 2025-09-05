@@ -2,7 +2,7 @@
   "id": "6f492d3f-5484-4b52-b515-2ea16ab3e8a9",
   "alias": "MemberProfilesWebPart",
   "componentType": "WebPart",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "manifestVersion": 2,
   "supportsFullBleed": true,
   "requiresCustomScript": false,
@@ -43,7 +43,22 @@
     "scriptResources": {
       "member-profiles-web-part": {
         "type": "path",
-        "path": "member-profiles-web-part_83a9d4be592ab45ab55c.js"
+        "path": "member-profiles-web-part_12b8f066b529c8436c57.js"
+      },
+      "@microsoft/sp-core-library": {
+        "type": "component",
+        "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b",
+        "version": "1.19.0"
+      },
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+        "version": "1.19.0"
+      },
+      "@microsoft/sp-webpart-base": {
+        "type": "component",
+        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
+        "version": "1.19.0"
       },
       "react": {
         "type": "component",
@@ -54,16 +69,6 @@
         "type": "component",
         "id": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
         "version": "17.0.1"
-      },
-      "@microsoft/sp-core-library": {
-        "type": "component",
-        "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b",
-        "version": "1.19.0"
-      },
-      "@microsoft/sp-webpart-base": {
-        "type": "component",
-        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
-        "version": "1.19.0"
       }
     }
   }

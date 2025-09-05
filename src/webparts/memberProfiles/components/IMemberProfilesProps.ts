@@ -1,7 +1,7 @@
 export interface IMemberProfilesProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
-  hasTeamsContext: boolean;
-  userDisplayName: string;
+  listId: string;          // profiles data list
+  imageListId?: string;    // optional image library
+  itemsPerPage?: number;
+  accentColor: string;
+ 
 }
