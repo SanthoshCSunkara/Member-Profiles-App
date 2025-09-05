@@ -1,0 +1,81 @@
+@use 'sass:color';
+@import '~@fluentui/react/dist/sass/References.scss';
+
+:root { --accent: #114461; }
+
+.wrapper { padding: 8px 0 0; }
+
+.container { max-width: 1100px; margin: 0 auto; }
+
+.headingWrap { text-align: center; margin: 0 0 8px; }
+.heading { font-size: 42px; font-weight: 800; color: #f57c00; line-height: 1.2; margin: 0; }
+.subtitle { font-size: 20px; color: #1565c0; margin: 6px 0 16px; }
+
+.searchRow { display: grid; grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 12px; margin: 10px auto 18px; max-width: 1100px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: stretch; }
+
+.card { border: 1px solid #edf2f7; border-radius: 12px; background: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,.06); transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease; cursor: pointer; overflow: hidden; text-align: left; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.10); border-color: #f57c00; background: #fff3e0; }
+.cardActive { outline: 2px solid var(--accent); box-shadow: 0 10px 22px rgba(17,68,97,.25); }
+
+.row { display: flex; gap: 12px; padding: 10px 12px; align-items: center; }
+.avatar { width: 56px; height: 56px; border-radius: 50%; background: #2d3748; color: #fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size: 18px; overflow: hidden; }
+.avatar img { width: 100%; height:100%; object-fit: cover; }
+
+.meta { min-width: 0; display:flex; flex-direction: column; gap: 2px; }
+.name { font-weight: 700; font-size: 16px; color: color.adjust(#114461, $lightness: -2%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role { font-size: 13px; color: #5a6a7a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.links { padding: 0 12px 12px; display:flex; gap:8px; flex-wrap: wrap; }
+.viewMore { font-weight: 700; color: #f57c00; }
+.viewMoreInline { font-weight: 700; color: #f57c00; font-size: 13px; margin-top: 4px; }
+.viewMore { font-weight: 700; color: #f57c00; }
+.linkBtn { border: 1px solid var(--accent); border-radius: 999px; padding: 4px 10px; font-weight: 600; font-size:12px; background: #D6EAF7; color: var(--accent); text-decoration: none; }
+
+/* Modal */
+.modalContainer { max-width: 980px; width: calc(100% - 40px); margin: 40px auto; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
+.modalHeader { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid #edf2f7; }
+.modalTitle { font-size: 24px; font-weight: 800; color: #114461; }
+.modalBody { display:grid; grid-template-columns: 320px 1fr; gap: 20px; padding: 16px; }
+.modalLeft { align-self: start; min-width: 0; }
+.modalRight { min-width: 0; }
+.modalCard { border: 1px solid #e5e7eb; border-radius: 12px; background:#fff; padding: 12px; }
+.modalName { text-align:center; font-weight:800; font-size:18px; color:#114461; }
+.modalRole { text-align:center; font-weight:600; color:#114461; }
+.modalMeta { display:flex; justify-content:center; gap:12px; color:#114461; margin: 6px 0 10px; }
+.modalImage { width: 100%; border-radius: 12px; }
+.modalRight { min-width: 0; }
+
+.detailsTitle { color: var(--accent); font-weight: 800; }
+.detailsHeader { border-bottom: 1px solid #edf2f7; padding-bottom: 8px; margin-bottom: 8px; }
+.detailsMeta { display:flex; flex-wrap: wrap; gap:12px; color:#355; }
+.detailsHtml p { margin: 0 0 10px; }
+/* src/webparts/memberProfiles/components/MemberProfiles.module.scss */
+
+:root {
+  --accent: #114461;
+  /* Add a crisp, readable sans font stack */
+  --fontSans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+              "Segoe UI Variable Text", "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Apply across the web part */
+.wrapper {
+  font-family: var(--fontSans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Headings cleaner & bolder */
+.heading {
+  font-family: var(--fontSans);
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+/* Card typography tweaks */
+.name { font-weight: 700; letter-spacing: .1px; }
+.role { font-weight: 500; color: #334155; }         /* darker, higher contrast */
+.viewMoreInline { font-weight: 700; letter-spacing: .1px; }

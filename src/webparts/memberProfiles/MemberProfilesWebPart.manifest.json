@@ -1,0 +1,31 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "6f492d3f-5484-4b52-b515-2ea16ab3e8a9",
+  "alias": "MemberProfilesWebPart",
+  "componentType": "WebPart",
+
+
+  "version": "*",
+  "manifestVersion": 2,
+  "supportsFullBleed": true,
+
+ 
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", 
+    "group": { "default": "Advanced" },
+    "title": { "default": "Member Profiles" },
+    "description": { "default": "Search and view team member profiles." },
+    "officeFabricIconFontName": "Page",
+    "properties": {
+      "description": "Member Profiles",
+      "listId": "",
+      "itemsPerPage": 36,
+      "useProfileDetailsField": true,
+      "accentColor": "#114461"
+    }
+  }]
+}

@@ -1,0 +1,21 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.19.1",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.12.0"
+    },
+    "version": "1.19.0",
+    "libraryName": "member-profiles",
+    "libraryId": "d209510b-4604-46c6-832e-a29a3c175cc9",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "Member Profiles",
+    "solutionShortDescription": "Member Profiles description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

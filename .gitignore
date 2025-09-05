@@ -1,0 +1,37 @@
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Dependencies / caches / builds
+node_modules/
+dist/
+lib/
+temp/
+.temp/
+.cache/
+.heft/
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.vs/
+*.ntvs_analysis.dat
+
+# Generated source
+*.resx.ts
+*.scss.ts
+
+# --- Keep SPFx packaging output & packages ---
+!sharepoint/
+!sharepoint/solution/
+!sharepoint/solution/*.sppkg

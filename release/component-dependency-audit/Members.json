@@ -1,0 +1,8 @@
+{
+  "bundles": {
+    "member-profiles-web-part": {
+      "dependencies": [],
+      "asyncChunks": {}
+    }
+  }
+}
