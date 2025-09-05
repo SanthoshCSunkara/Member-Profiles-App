@@ -1,3 +1,4 @@
+// src/webparts/memberProfiles/components/MemberCard.tsx
 import * as React from 'react';
 import styles from './MemberProfiles.module.scss';
 import type { IProfileItem } from '../models';
@@ -9,9 +10,7 @@ interface Props {
   onClick: (item: IProfileItem) => void;
 }
 
-const AVATAR = 112; // retina-crisp (your CSS still shows 56x56)
-
-/** Safely append width/height/mode to any URL */
+/** Safe query-appender for width/height/mode=crop */
 const buildPrimary = (raw: string, w: number, h: number) => {
   try {
     const u = new URL(raw, window.location.origin);
@@ -20,37 +19,41 @@ const buildPrimary = (raw: string, w: number, h: number) => {
     u.searchParams.set('mode', 'crop');
     return u.toString();
   } catch {
-    // if URL() fails, fall back to your original heuristic
     const sep = raw.indexOf('?') > -1 ? '&' : '?';
     return `${raw}${sep}width=${w}&height=${h}&mode=crop`;
   }
 };
 
-/** SP preview handler (closest to list-formatting getThumbnailImage) */
-const buildFallback = (raw: string, w: number, h: number) =>
+/** SP preview handler – last resort */
+const buildPreview = (raw: string, w: number, h: number) =>
   `/_layouts/15/getpreview.ashx?path=${encodeURIComponent(raw)}&width=${w}&height=${h}`;
 
 export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
   const baseUrl = item.photoUrl || '';
+  const CSS_SIZE = 56;                 // visual size in CSS
+  const DPR = Math.min(2, Math.ceil(window.devicePixelRatio || 1));
+  const REND_1X = CSS_SIZE;            // 56
+  const REND_2X = CSS_SIZE * DPR;      // 112 on HiDPI
 
-  const [src, setSrc] = React.useState<string | undefined>(() =>
-    baseUrl ? buildPrimary(baseUrl, AVATAR, AVATAR) : undefined
-  );
-  const [usedFallback, setUsedFallback] = React.useState(false);
+  const primary = baseUrl ? buildPrimary(baseUrl, REND_2X, REND_2X) : undefined;
+  const oneX = baseUrl ? buildPrimary(baseUrl, REND_1X, REND_1X) : undefined;
+
+  // 0 = primary, 1 = original, 2 = preview; then solid color
+  const [src, setSrc] = React.useState<string | undefined>(primary);
+  const [phase, setPhase] = React.useState<0 | 1 | 2>(0);
 
   React.useEffect(() => {
-    setSrc(baseUrl ? buildPrimary(baseUrl, AVATAR, AVATAR) : undefined);
-    setUsedFallback(false);
-  }, [baseUrl, item.id]);
+    const p = baseUrl ? buildPrimary(baseUrl, REND_2X, REND_2X) : undefined;
+    setSrc(p);
+    setPhase(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [item.id, baseUrl]);
 
   const handleError = () => {
     if (!baseUrl) return;
-    if (!usedFallback) {
-      setSrc(buildFallback(baseUrl, AVATAR, AVATAR));
-      setUsedFallback(true);
-    } else {
-      setSrc(undefined); // show solid block; no further retries
-    }
+    if (phase === 0) { setSrc(baseUrl); setPhase(1); return; }
+    if (phase === 1) { setSrc(buildPreview(baseUrl, REND_2X, REND_2X)); setPhase(2); return; }
+    setSrc(undefined);
   };
 
   return (
@@ -66,6 +69,10 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
           {src ? (
             <img
               src={src}
+              srcSet={oneX && primary ? `${oneX} 1x, ${primary} 2x` : undefined}
+              sizes={`${CSS_SIZE}px`}
+              width={CSS_SIZE}
+              height={CSS_SIZE}
               alt=""
               loading="lazy"
               decoding="async"
