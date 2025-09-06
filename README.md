@@ -205,6 +205,14 @@ export interface IProfileItem {
   detailsHtml?: string;       // sanitized in modal
 }
 
+
+
+<img width="574" height="228" alt="image" src="https://github.com/user-attachments/assets/e589b156-1496-49dd-8794-4bdc9697453d" />
+
+
+<img width="272" height="492" alt="image" src="https://github.com/user-attachments/assets/2ad81c47-522b-4d5f-83b5-2321da292932" />
+
+
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Prerequisites
 
