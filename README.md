@@ -207,10 +207,14 @@ export interface IProfileItem {
 
 
 
-<img width="574" height="228" alt="image" src="https://github.com/user-attachments/assets/e589b156-1496-49dd-8794-4bdc9697453d" />
+<img width="761" height="352" alt="image" src="https://github.com/user-attachments/assets/911ec344-6c72-4d7f-b960-495604015506" />
+
+<img width="927" height="657" alt="image" src="https://github.com/user-attachments/assets/4eb283ba-2b1f-4acc-a789-20b26787ca89" />
+
+<img width="296" height="501" alt="image" src="https://github.com/user-attachments/assets/2b36b706-736f-4d11-858e-b805deb52cdc" />
 
 
-<img width="272" height="492" alt="image" src="https://github.com/user-attachments/assets/2ad81c47-522b-4d5f-83b5-2321da292932" />
+
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
