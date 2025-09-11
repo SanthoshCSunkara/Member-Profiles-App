@@ -3,7 +3,7 @@
   "solution": {
     "name": "member-profiles-client-side-solution",
     "id": "d209510b-4604-46c6-832e-a29a3c175cc9",
-    "version": "3.0.0.0",
+    "version": "5.0.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

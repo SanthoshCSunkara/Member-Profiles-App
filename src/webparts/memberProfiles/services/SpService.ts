@@ -47,6 +47,7 @@ export class SpService {
         'Id','Title','Role','Hire_x0020_Date','Birthday',
         'CompanyProfile','LinkedIn','About','Modified','Created'
       )
+      .orderBy('Title', true) 
       .top(5000)();
 
     const formatDate = (d?: string | Date): string | undefined => {

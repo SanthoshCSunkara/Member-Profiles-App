@@ -8,6 +8,7 @@ import { IconButton } from '@fluentui/react/lib/Button';
 import { Icon } from '@fluentui/react/lib/Icon';
 import type { IProfileItem } from '../models';
 import styles from './MemberProfiles.module.scss';
+//import { Avatar } from './Avatar/Avatar';
 
 interface IDetailsPanelProps {
   item?: IProfileItem;
@@ -124,7 +125,9 @@ export const DetailsPanel: React.FC<IDetailsPanelProps> = ({ item, isOpen, onDis
                   alt={item.name}
                   loading="lazy"
                   onError={onImgError}
-                />
+                /> 
+                //<Avatar name={item.name} src={item.photoUrl} size="xl" rounded />
+
               )}
             </div>
           </div>
