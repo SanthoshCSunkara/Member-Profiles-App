@@ -1,0 +1,16 @@
+.container {
+  position: relative;
+  padding: 4px;              /* subtle frame space */
+  border-radius: 18px;
+}
+
+/* kill glow/blur/animation entirely */
+.glow { display: none; }
+
+.inner {
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15,23,42,.06); /* crisp */
+}
