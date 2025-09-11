@@ -1,225 +1,178 @@
+/* src/webparts/memberProfiles/components/MemberProfiles.module.scss */
 @use 'sass:color';
 
-:root { --accent: #114461; }
+/* ---------- Tokens ---------- */
+$accent-fallback: #114461;
 
-.memberProfiles { overflow: hidden; padding: 1em; }
+:root {
+  --ink-1: #0f172a;
+  --ink-3: #64748b;
+  --surface: #ffffff;
+  --bg: #f5f6f8;   /* page background */
+  --gap: 8px;
+}
 
-.wrapper { padding: 8px 0 0; }
+/* ---------- Page wrapper (actual grey background) ---------- */
+.wrapper { background: var(--bg); }
 
-/* --- Global text rendering for clarity --- */
-.wrapper, .modalContainer {
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+.memberProfiles {
+  background: var(--bg);
+  padding: 24px 0 32px;
+  min-height: 200px;
+  font-family:
+    "Segoe UI Variable Display","Segoe UI Variable Text",
+    "Segoe UI","Segoe UI Web (West European)",
+    system-ui,-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   color: #0f2135;
 }
 
-/* --- Header --- */
+/* Header */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 12px; }
 .headingWrap { display: grid; justify-items: center; gap: 6px; margin-bottom: 10px; }
-.heading { 
-  margin: 0; 
-  font-weight: 800; 
-  color: var(--accent); 
-  font-size: clamp(28px, 4vw, 42px); 
-  line-height: 1.1; 
-  text-align: center; 
+.heading {
+  margin: 0; font-weight: 800; color: var(--accent, #{$accent-fallback});
+  font-size: clamp(28px, 4vw, 42px); line-height: 1.1; text-align: center;
 }
-.subtitle { 
-  color: #2f5e86; 
-  font-size: clamp(14px, 2.4vw, 20px); 
-  text-align: center; 
+.subtitle { color: #2f5e86; font-size: clamp(14px, 2.4vw, 20px); text-align: center; margin: 0; }
+
+/* Search row */
+.searchRow {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin: 20px auto 16px; max-width: 1100px;
 }
 
-/* --- Search --- */
-.searchRow { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 10px; width: 100%; }
-
-/* --- Cards grid --- */
+/* Grid – auto-fit, expands from 2 to 3 columns only when comfortable */
 .grid {
-  max-width: 1280px; margin: 12px auto; padding: 0 12px;
-  display: grid; 
-  //grid-template-columns: repeat(3, minmax(0, 1fr));  /* exactly 3 */
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  //grid-template-columns: repeat(2, minmax(0, 1fr)); /* force exactly 2 columns */
-  gap: 8px; align-items: stretch;
+  display: grid;
+  gap: var(--gap);
+  --card-min: 320px;
+  grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+  grid-auto-rows: min-content;
+  align-items: start;
+  max-width: 1200px; margin: 12px auto; padding: 0 12px;
 }
-/*@media (max-width: 600px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-} */
+.grid > * { min-width: 0; }
 
-/* Below ~980px make it a single column for readability */
- @media (max-width: 760px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-} 
-
-/* ===== CARD ===== */
+/* Cards (no hover animation) */
 .card {
   position: relative;
-  border: 1px solid #e6eef6;         /* subtle default */
+  border: 1px solid #e6eef6;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: 0 2px 10px rgba(0,0,0,.06);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background-color .12s ease;
   cursor: pointer;
   overflow: hidden;
   text-align: left;
-  /* padding: 12px 16px 12px 14px;    padding: 18px 22px;  added for 96 */
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
 }
-
-/* Orange hover highlight */
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,.10);
-  border-color: #f7c391;
-  background-color: #fff7ed; /* warm but light */
+.card:hover, .card:focus, .card:focus-within {
+  transform: none !important;
+  box-shadow: inherit !important;
+  filter: none !important;
 }
-
-/* Selected/active state – clear orange outline */
 .cardActive {
-  outline: 3px solid #f07f17;
-  outline-offset: 0;
-  background-color: #fff7ed;
-  box-shadow: 0 10px 22px rgba(240,127,23,.15);
-}
-/* Keyboard focus inside the card */
-.card:focus,
-.card:focus-within {
-  outline: 3px solid #f07f17;
+  outline: 3px solid var(--accent, #{$accent-fallback});
   outline-offset: 0;
 }
 
+/* Card layout/content */
 .row { display: flex; gap: 12px; padding: 12px 14px; align-items: center; }
 
-/* avatar stays crisp and circular */
+/* --- CIRCULAR ICON (default) --- */
 .avatar {
-  //width: 56px; height: 56px; border-radius: 50%;
-  width: 96px; height: 96px; border-radius: 50%;
-  background: #2d3748; overflow: hidden; 
-  //flex: 0 0 56px;
-  flex: 0 0 96px;
-}
-.avatar img { width: 100%; height:100%; object-fit: cover; display:block; margin: 0;  }
-
-/* ===== TYPOGRAPHY IN CARD ===== */
-.meta { min-width: 0; display:flex; flex-direction: column; gap: 4px; }
-
-/* Names: lighter weight + responsive size + higher contrast */
-.name {
-  font-weight: 700;                        /* was 800 – easier to read */
-  color: #0f2135;                          /* higher contrast */
-  font-size: clamp(16px, 1.6vw, 20px);     /* responsive */
-  line-height: 1.25;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  letter-spacing: .2px;
-}
-
-/* Role: slightly larger & responsive */
-.role {
-  font-size: clamp(13px, 1.2vw, 16px);
-  color: #5a6a7a;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-/* “View more details…” inline hint */
-.viewMoreInline {
-  margin-top: 4px;
-  font-weight: 700;
-  color: #f07f17;
-  font-size: clamp(12px, 1.1vw, 14px);
-}
-/* --- Modal --- */
-.modalContainer {
-  width: min(1120px, 96vw);
-  margin: 5vh auto;
-  background: #fff;
-  border-radius: 14px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,.18);
-  max-height: 90vh;
+  background: #2d3748;
+  flex: 0 0 96px; /* keep the row height tight and consistent */
 }
 
-.modalHeader {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-bottom: 1px solid #edf2f7;
-}
-.modalTitle {
-  font-weight: 800; color: var(--accent);
-  font-size: clamp(20px, 2.5vw, 28px); line-height: 1.2;
-}
-
-.modalBody {
-  display: grid; grid-template-columns: 340px 1fr;
-  gap: 24px; padding: 16px;
-}
-@media (max-width: 900px) {
-  .modalBody { grid-template-columns: 1fr; }
+/* Make the bitmap crisp, avoid compositor blur */
+.avatar img,
+.avatarRect img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: -webkit-optimize-contrast; /* WebKit downsampling hint */
+  image-rendering: auto;
 }
 
-/* Left column card */
-.modalLeft { 
-  min-width: 0;     /* allows content to shrink in CSS grid */
-  overflow: hidden; /* guards against accidental overflow */
+/* Row alignment: keep height tight to the avatar */
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 96px; /* prevents odd vertical stretching */
 }
-.modalCard {
-  border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.06);
-  background: #fff;
+
+/* --- OPTIONAL PORTRAIT VARIANT (3:4) ---
+   If you ever want rectangle portraits, use styles.avatarRect in TSX.
+   Note: NO 'height: 100%' here; we lock the shape with aspect-ratio. */
+.avatarRect {
+  width: 112px;          /* 112–128 looks good in your card */
+  flex: 0 0 112px;       /* basis matches width, so layout doesn’t fight */
+  aspect-ratio: 3 / 4;   /* keeps a 3:4 portrait box without hardcoding height */
+  border-radius: 12px;
+  overflow: hidden;
+  background: #eef2f6;
 }
+
+/* optional portrait variant */
+
+.meta { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.name {
+  font-weight: 700; color: #0f2135;
+  font-size: clamp(16px, 1.6vw, 20px); line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .2px;
+}
+.role {
+  font-size: clamp(13px, 1.2vw, 16px); color: #5a6a7a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ---------- Modal (all classes kept so DetailsPanel compiles) ---------- */
+.modalContainer {
+  width: min(1120px, 96vw); margin: 5vh auto; background: var(--surface);
+  border-radius: 14px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.18); max-height: 90vh;
+}
+.modalHeader { display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid #edf2f7; }
+.modalTitle { font-weight: 800; color: var(--accent, #{$accent-fallback});
+  font-size: clamp(20px, 2.5vw, 28px); line-height: 1.2; }
+.modalBody { display: grid; grid-template-columns: 340px 1fr; gap: 24px; padding: 16px; }
+@media (max-width: 900px) { .modalBody { grid-template-columns: 1fr; } }
+
+.modalLeft { min-width: 0; overflow: hidden; }
+.modalCard { border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,.06); background: var(--surface); }
 .modalName { font-weight: 800; font-size: clamp(18px, 2.4vw, 22px); color: #0f2135; text-align: center; }
 .modalRole { font-size: 14px; color: #5a6a7a; text-align: center; margin-top: 2px; }
 
-.modalMeta { 
-  margin: 10px 0 12px; display:flex; flex-wrap: wrap; gap:10px; justify-content:center; color:#355; 
-  font-size: 14px; 
-}
-.modalMeta :global(.ms-Icon) { margin-right: 6px; }
-
-/* Buttons (Company Profile / LinkedIn) */
+/* These four were missing at build time → compile failed */
+.modalMeta { margin: 10px 0 12px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; color:#355; font-size: 14px; }
 .btnRow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 4px 0 10px; }
 .btnGhost {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: 999px; text-decoration: none;
-  border: 1px solid var(--accent); color: var(--accent); background: #fbfbfc;
-  font-weight: 700; font-size: 13px;
+  border: 1px solid var(--accent, #{$accent-fallback}); color: var(--accent, #{$accent-fallback});
+  background: #fbfbfc; font-weight: 700; font-size: 13px;
 }
-.btnGhost:hover { filter: brightness(0.95); }
+.btnGhost:hover { filter: brightness(0.96); }
+.modalImage { width: 100%; height: auto; border-radius: 10px; display: block; margin-top: 10px; max-height: 420px; object-fit: cover; }
 
-/* Photo: clear & responsive (no blur) */
-.modalImage {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  display: block;
-  margin-top: 10px;
-  /* If a very tall image, cap height to avoid soft scaling */
-  max-height: 420px;
-  object-fit: cover;
-}
-
-/* Right column rich text */
-/* Right column wrapper: not empty + prevents text overflow in grid */
-.modalRight {
-  min-width: 0;     /* allows content to shrink in CSS grid */
-  overflow: hidden; /* guards against accidental overflow */
-}
-
-.detailsHtml {
-  font-size: clamp(14px, 2vw, 16px);
-  line-height: 1.65;
-  color: #0f2135;
-}
-.detailsHtml :global(h3),
-.detailsHtml :global(h4) {
-  color: var(--accent);
-  margin: 14px 0 8px;
-  font-weight: 800;
-}
+.modalRight { min-width: 0; overflow: hidden; }
+.detailsHtml { font-size: clamp(14px, 2vw, 16px); line-height: 1.65; color: #0f2135; }
+.detailsHtml :global(h3), .detailsHtml :global(h4) { color: var(--accent, #{$accent-fallback}); margin: 14px 0 8px; font-weight: 800; }
 .detailsHtml :global(p) { margin: 0 0 12px; }
 .detailsHtml :global(ul) { margin: 0 0 12px; padding-left: 22px; }
 .detailsHtml :global(li) { margin: 4px 0; }
-
-/* Small utility (kept from your earlier file) */
-.title { font-size: 24px; font-weight: 700; color: var(--accent); }

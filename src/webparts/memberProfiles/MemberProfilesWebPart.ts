@@ -16,6 +16,7 @@ import { SpService } from './services/SpService';
 
 export interface IMemberProfilesWebPartProps extends IMemberProfilesProps {}
 
+
 export default class MemberProfilesWebPart extends BaseClientSideWebPart<IMemberProfilesWebPartProps> {
   private listOptions: IPropertyPaneDropdownOption[] = [];
   private imageListOptions: IPropertyPaneDropdownOption[] = [];
@@ -23,6 +24,8 @@ export default class MemberProfilesWebPart extends BaseClientSideWebPart<IMember
 
   public async onInit(): Promise<void> {
     this.svc = new SpService(this.context);
+    this.properties.pageTitle    ??= 'Team Member Profiles';
+    this.properties.pageSubtitle ??= 'Get to know more about our team!';
   }
 
   public render(): void {
@@ -31,7 +34,10 @@ export default class MemberProfilesWebPart extends BaseClientSideWebPart<IMember
       listId: this.properties.listId,
       imageListId: this.properties.imageListId,                // may be undefined
       itemsPerPage: this.properties.itemsPerPage,              // 0/undefined => show all
-      accentColor: this.properties.accentColor || '#114461'
+      accentColor: this.properties.accentColor || '#114461',
+
+       pageTitle: this.properties.pageTitle,
+       pageSubtitle: this.properties.pageSubtitle
     } as IMemberProfilesProps);
 
     ReactDom.render(element, this.domElement);
@@ -70,7 +76,15 @@ export default class MemberProfilesWebPart extends BaseClientSideWebPart<IMember
                 PropertyPaneSlider('itemsPerPage', { label: 'Max Users on a page (0 = All)', min: 0, max: 5000, step: 10 }),
                 PropertyPaneTextField('accentColor', { label: 'Accent color (hex)', description: 'Corporate color, e.g. #114461' })
               ]
+            },
+            {
+              groupName: 'Page Title',
+              groupFields: [
+                PropertyPaneTextField('pageTitle', { label: 'Page Title' }),
+                PropertyPaneTextField('pageSubtitle', { label: 'Sub title' })
+              ]
             }
+
           ]
         }
       ]

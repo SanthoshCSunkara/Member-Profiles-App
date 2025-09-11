@@ -43,7 +43,7 @@
     "scriptResources": {
       "member-profiles-web-part": {
         "type": "path",
-        "path": "member-profiles-web-part.js"
+        "path": "member-profiles-web-part_82f8289b8938a3847d7e.js"
       },
       "@microsoft/sp-core-library": {
         "type": "component",

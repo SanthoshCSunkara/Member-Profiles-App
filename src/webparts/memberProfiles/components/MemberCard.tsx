@@ -2,60 +2,52 @@
 import * as React from 'react';
 import styles from './MemberProfiles.module.scss';
 import type { IProfileItem } from '../models';
-//import { Avatar } from './Avatar/Avatar';
 
-interface Props {
+interface IProps {
   item: IProfileItem;
-  active?: boolean;
-  accentColor: string;
   onClick: (item: IProfileItem) => void;
+  active?: boolean;
+  accentColor?: String
 }
 
-/** Safe query-appender for width/height/mode=crop */
-const buildPrimary = (raw: string, w: number, h: number) => {
-  try {
-    const u = new URL(raw, window.location.origin);
-    u.searchParams.set('width', String(w));
-    u.searchParams.set('height', String(h));
-    u.searchParams.set('mode', 'crop');
-    return u.toString();
-  } catch {
-    const sep = raw.indexOf('?') > -1 ? '&' : '?';
-    return `${raw}${sep}width=${w}&height=${h}&mode=crop`;
-  }
+/** CSS size in the layout (kept as 96px so your UI does not change). */
+const AVATAR_CSS_PX = 96;
+
+/**
+ * Some endpoints (e.g., Graph /photo/$value) ignore resize query params.
+ * We only add ?width=&height=&quality= when it’s a library URL.
+ */
+const canResizeViaQuery = (url?: string) =>
+  !!url && !/\/photo\/\$value/i.test(url || '');
+
+/** Build a preview URL with target pixel size. */
+const buildPreview = (url: string, px: number) => {
+  if (!url || !canResizeViaQuery(url)) return url;
+  const sep = url.indexOf('?') >= 0 ? '&' : '?';
+  return `${url}${sep}width=${px}&height=${px}&quality=90`;
 };
 
-/** SP preview handler – last resort */
-const buildPreview = (raw: string, w: number, h: number) =>
-  `/_layouts/15/getpreview.ashx?path=${encodeURIComponent(raw)}&width=${w}&height=${h}`;
+/** Safe initials fallback */
+const initials = (name?: string) => {
+  const t = (name || '').trim();
+  if (!t) return '';
+  const parts = t.split(/\s+/).slice(0, 2);
+  return parts.map(p => p[0]?.toUpperCase() || '').join('');
+};
 
-export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
-  const baseUrl = item.photoUrl || '';
-  const CSS_SIZE = 96;                 // visual size in CSS
-  const DPR = Math.min(2, Math.ceil(window.devicePixelRatio || 1));
-  const REND_1X = CSS_SIZE;            // 56
-  const REND_2X = CSS_SIZE * DPR;      // 112 on HiDPI
+export const MemberCard: React.FC<IProps> = ({ item, onClick, active }) => {
+  const base = item.photoUrl || '';
 
-  const primary = baseUrl ? buildPrimary(baseUrl, REND_2X, REND_2X) : undefined;
-  const oneX = baseUrl ? buildPrimary(baseUrl, REND_1X, REND_1X) : undefined;
+  // Device pixel ratio aware fetch sizes: always give the browser a 2x version,
+  // and a 1.5x for mid-DPR screens. This closely mirrors your portrait branch.
+  const dpr = typeof window !== 'undefined' ? Math.min(3, window.devicePixelRatio || 1) : 1;
+  const fetch1x = Math.round(AVATAR_CSS_PX * Math.max(1, dpr >= 1.5 ? 1.5 : 1)); // 96 or 144
+  const fetch2x = Math.round(AVATAR_CSS_PX * Math.min(2, Math.ceil(dpr)));        // 192
 
-  // 0 = primary, 1 = original, 2 = preview; then solid color
-  const [src, setSrc] = React.useState<string | undefined>(primary);
-  const [phase, setPhase] = React.useState<0 | 1 | 2>(0);
+  const src1x = buildPreview(base, fetch1x);
+  const src2x = buildPreview(base, fetch2x);
 
-  React.useEffect(() => {
-    const p = baseUrl ? buildPrimary(baseUrl, REND_2X, REND_2X) : undefined;
-    setSrc(p);
-    setPhase(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.id, baseUrl]);
-
-  const handleError = () => {
-    if (!baseUrl) return;
-    if (phase === 0) { setSrc(baseUrl); setPhase(1); return; }
-    if (phase === 1) { setSrc(buildPreview(baseUrl, REND_2X, REND_2X)); setPhase(2); return; }
-    setSrc(undefined);
-  };
+  const hasPhoto = !!base;
 
   return (
     <button
@@ -67,30 +59,52 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
     >
       <div className={styles.row}>
         <div className={styles.avatar}>
-          {src ? (
-           <img
-              src={src}
-              srcSet={oneX && primary ? `${oneX} 1x, ${primary} 2x` : undefined}
-              sizes={`${CSS_SIZE}px`}
-              width={CSS_SIZE}
-              height={CSS_SIZE}
-              alt=""
+          {hasPhoto ? (
+            <img
+              // important: give the browser larger pixels than we render
+              src={src1x}
+              srcSet={
+                src2x && src2x !== src1x ? `${src1x} 1x, ${src2x} 2x` : undefined
+              }
+              sizes={`${AVATAR_CSS_PX}px`}
+              // lock raster to the pixel grid (prevents soft resampling)
+              width={AVATAR_CSS_PX}
+              height={AVATAR_CSS_PX}
+              alt={`${item.name} photo`}
               loading="lazy"
               decoding="async"
-              onError={handleError}
+              style={{
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translateZ(0)' // create a stable layer, no animation
+              }}
             />
-            //<Avatar name={item.name} src={item.photoUrl} size="lg" rounded />
           ) : (
-            <span aria-hidden="true" />
+            <div
+              style={{
+                width: AVATAR_CSS_PX,
+                height: AVATAR_CSS_PX,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#E8F0F7',
+                background: '#2d3748',
+                borderRadius: '50%',
+                fontWeight: 800
+              }}
+            >
+              {initials(item.name)}
+            </div>
           )}
         </div>
 
         <div className={styles.meta}>
           <div className={styles.name}>{item.name}</div>
-          {item.role && <div className={styles.role}>{item.role}</div>}
-          
+          <div className={styles.role}>{item.role}</div>
         </div>
       </div>
     </button>
   );
 };
+
+export default MemberCard;

@@ -18,7 +18,11 @@ interface IComponentProps extends IMemberProfilesProps {
 const norm = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export const MemberProfiles: React.FC<IComponentProps> = (props) => {
-  const { listId, imageListId, itemsPerPage, accentColor, context } = props;
+  const {
+    listId, imageListId, itemsPerPage, accentColor,
+    pageTitle, pageSubtitle,   // <-- NEW
+    context
+  } = props;
 
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
@@ -50,12 +54,19 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
         setItems(merged);
         setLoading(false);
       })
-      .catch((e) => { if (!mounted) return; setError(e?.message || 'Load failed'); setLoading(false); });
+      .catch((e) => {
+        if (!mounted) return;
+        setError(e?.message || 'Load failed');
+        setLoading(false);
+      });
 
     return () => { mounted = false; };
   }, [listId, imageListId, service]);
 
-  const normalized = React.useMemo(() => items.map((i) => ({ ...i, key: i.id })), [items]);
+  const normalized = React.useMemo(
+    () => items.map((i) => ({ ...i, key: i.id })),
+    [items]
+  );
 
   const filtered = React.useMemo(() => {
     const n = searchName.trim().toLowerCase();
@@ -68,17 +79,15 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
       if (byName && byRole) out.push(it);
     }
     return out;
-    
   }, [normalized, searchName, searchRole]);
 
   // 0 or undefined => show ALL
-  const page = React.useMemo(
-    () => {
-      const cap = (itemsPerPage && itemsPerPage > 0) ? itemsPerPage : filtered.length;
-      return filtered.slice(0, cap);
-    },
-    [filtered, itemsPerPage]
-  );
+  const page = React.useMemo(() => {
+    const cap = (itemsPerPage && itemsPerPage > 0)
+      ? itemsPerPage
+      : filtered.length;
+    return filtered.slice(0, cap);
+  }, [filtered, itemsPerPage]);
 
   const searchStyles: Partial<ISearchBoxStyles> = {
     root: { borderRadius: 24, border: '1px solid #e5e7eb', height: 40, overflow: 'hidden' },
@@ -87,42 +96,60 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
   };
 
   return (
-    <div className={styles.wrapper} style={{ ['--accent' as any]: accentColor }}>
-      <div className={styles.container}>
-        <div className={styles.headingWrap}>
-          <h2 className={styles.heading}>Team Member Profiles</h2>
-          <div className={styles.subtitle}>Get to know more about our team!</div>
-        </div>
+    <div className={styles.memberProfiles}>
+      <div className={styles.wrapper} style={{ ['--accent' as any]: accentColor }}>
+        <div className={styles.container}>
+          <div className={styles.headingWrap}>
+            <h2 className={styles.heading}>
+              {pageTitle || 'Team Member Profiles'}
+            </h2>
+            <div className={styles.subtitle}>
+              {pageSubtitle || 'Get to know more about our team!'}
+            </div>
+          </div>
 
-        <div className={styles.searchRow}>
-          <SearchBox placeholder="Search by name" styles={searchStyles} onChange={(_, v) => setSearchName(v || '')} />
-          <SearchBox placeholder="Search by role/title" styles={searchStyles} onChange={(_, v) => setSearchRole(v || '')} />
-        </div>
-      </div>
-
-      {error && (<MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>)}
-      {loading && (<Spinner size={SpinnerSize.large} label="Loading profiles..." />)}
-
-      {!loading && (
-        <div className={styles.grid}>
-          {page.map((p) => (
-            <MemberCard
-              key={p.id}
-              item={p}
-              onClick={setActive}
-              accentColor={accentColor}
-              active={active?.id === p.id}
+          <div className={styles.searchRow}>
+            <SearchBox
+              placeholder="Search by name"
+              styles={searchStyles}
+              onChange={(_, v) => setSearchName(v || '')}
             />
-          ))}
+            <SearchBox
+              placeholder="Search by role/title"
+              styles={searchStyles}
+              onChange={(_, v) => setSearchRole(v || '')}
+            />
+          </div>
         </div>
-      )}
 
-      <DetailsPanel
-        item={active}
-        isOpen={!!active}
-        onDismiss={() => setActive(undefined)}
-        accentColor={accentColor}
-      />
+        {error && (
+          <MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>
+        )}
+        {loading && (
+          <Spinner size={SpinnerSize.large} label="Loading profiles..." />
+        )}
+
+        {!loading && (
+          <div className={styles.grid}>
+            {page.map((p) => (
+              <MemberCard
+                key={p.id}
+                item={p}
+                onClick={setActive}
+                accentColor={accentColor}
+                active={active?.id === p.id}
+              />
+            ))}
+          </div>
+        )}
+
+        <DetailsPanel
+          item={active}
+          isOpen={!!active}
+          onDismiss={() => setActive(undefined)}
+          accentColor={accentColor || '#114461'}
+        />
+      </div>
     </div>
   );
 };
