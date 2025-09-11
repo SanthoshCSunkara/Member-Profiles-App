@@ -35,3 +35,8 @@ Thumbs.db
 !sharepoint/
 !sharepoint/solution/
 !sharepoint/solution/*.sppkg
+
+# Build artifacts
+release/assets/
+release/manifests/
+sharepoint/solution/debug/
