@@ -2,6 +2,7 @@
 import * as React from 'react';
 import styles from './MemberProfiles.module.scss';
 import type { IProfileItem } from '../models';
+//import { Avatar } from './Avatar/Avatar';
 
 interface Props {
   item: IProfileItem;
@@ -30,7 +31,7 @@ const buildPreview = (raw: string, w: number, h: number) =>
 
 export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
   const baseUrl = item.photoUrl || '';
-  const CSS_SIZE = 56;                 // visual size in CSS
+  const CSS_SIZE = 96;                 // visual size in CSS
   const DPR = Math.min(2, Math.ceil(window.devicePixelRatio || 1));
   const REND_1X = CSS_SIZE;            // 56
   const REND_2X = CSS_SIZE * DPR;      // 112 on HiDPI
@@ -67,7 +68,7 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
       <div className={styles.row}>
         <div className={styles.avatar}>
           {src ? (
-            <img
+           <img
               src={src}
               srcSet={oneX && primary ? `${oneX} 1x, ${primary} 2x` : undefined}
               sizes={`${CSS_SIZE}px`}
@@ -78,6 +79,7 @@ export const MemberCard: React.FC<Props> = ({ item, active, onClick }) => {
               decoding="async"
               onError={handleError}
             />
+            //<Avatar name={item.name} src={item.photoUrl} size="lg" rounded />
           ) : (
             <span aria-hidden="true" />
           )}

@@ -68,6 +68,7 @@ export const MemberProfiles: React.FC<IComponentProps> = (props) => {
       if (byName && byRole) out.push(it);
     }
     return out;
+    
   }, [normalized, searchName, searchRole]);
 
   // 0 or undefined => show ALL

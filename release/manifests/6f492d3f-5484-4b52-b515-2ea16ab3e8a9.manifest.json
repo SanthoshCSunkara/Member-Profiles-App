@@ -2,7 +2,7 @@
   "id": "6f492d3f-5484-4b52-b515-2ea16ab3e8a9",
   "alias": "MemberProfilesWebPart",
   "componentType": "WebPart",
-  "version": "3.0.0",
+  "version": "5.0.0",
   "manifestVersion": 2,
   "supportsFullBleed": true,
   "requiresCustomScript": false,
@@ -43,7 +43,7 @@
     "scriptResources": {
       "member-profiles-web-part": {
         "type": "path",
-        "path": "member-profiles-web-part_7136a73723a20911238e.js"
+        "path": "member-profiles-web-part.js"
       },
       "@microsoft/sp-core-library": {
         "type": "component",
