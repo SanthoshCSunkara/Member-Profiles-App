@@ -32,9 +32,14 @@
         "id": "d12c68ee-521e-4d29-8c9d-460b81aeee1f",
         "version": "1.0.0.0"
       }
-    ]
+    ],
+    "webApiPermissionRequests": [
+  { "resource": "Microsoft Graph", "scope": "User.ReadBasic.All" }
+]
+
   },
   "paths": {
     "zippedPackage": "solution/member-profiles.sppkg"
   }
+  
 }

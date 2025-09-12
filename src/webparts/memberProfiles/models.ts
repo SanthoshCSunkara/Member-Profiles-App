@@ -1,7 +1,13 @@
+import { WebPartContext } from '@microsoft/sp-webpart-base';
+
 export interface IMemberProfilesProps {
   listId: string;
   itemsPerPage: number;
   accentColor: string;
+  pageTitle?: string;
+  subTitle?: string;
+  imageLibraryId?: string;     // NEW: optional photo library id
+  context: WebPartContext;     // NEW: used by SpService
 }
 
 export interface IProfileItemRaw {

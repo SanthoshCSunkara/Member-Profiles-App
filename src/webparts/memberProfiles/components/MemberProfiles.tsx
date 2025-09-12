@@ -1,130 +1,169 @@
-// src/webparts/memberProfiles/components/MemberProfiles.tsx
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import styles from './MemberProfiles.module.scss';
-import { SearchBox, ISearchBoxStyles } from '@fluentui/react/lib/SearchBox';
-import { Spinner, SpinnerSize } from '@fluentui/react/lib/Spinner';
-import { MessageBar, MessageBarType } from '@fluentui/react/lib/MessageBar';
+import type { IMemberProfilesProps, IProfileItem } from '../models';
 import { MemberCard } from './MemberCard';
 import { DetailsPanel } from './DetailsPanel';
-import type { IProfileItem } from '../models';
 import { SpService } from '../services/SpService';
-import type { WebPartContext } from '@microsoft/sp-webpart-base';
-import type { IMemberProfilesProps } from './IMemberProfilesProps';
 
-interface IComponentProps extends IMemberProfilesProps {
-  context: WebPartContext;
-}
+/** ES5-safe normalizers for search and library matching */
+const toNorm = (s?: string) =>
+  (s || '').toString().trim().toLowerCase();
 
-const norm = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const keyify = (s?: string) =>
+  (s || '').toString().toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]/g, '');
 
-export const MemberProfiles: React.FC<IComponentProps> = (props) => {
-  const { listId, imageListId, itemsPerPage, accentColor, context } = props;
+export const MemberProfiles: React.FC<IMemberProfilesProps> = (props) => {
+  const { listId, itemsPerPage, accentColor, pageTitle, subTitle, imageLibraryId, context } = props;
 
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | undefined>();
   const [items, setItems] = React.useState<IProfileItem[]>([]);
-  const [searchName, setSearchName] = React.useState('');
-  const [searchRole, setSearchRole] = React.useState('');
-  const [active, setActive] = React.useState<IProfileItem | undefined>();
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  const service = React.useMemo(() => new SpService(context), [context]);
+  const [qPeople, setQPeople] = React.useState<string>('');
+  const [qDetails, setQDetails] = React.useState<string>('');
+  const [selected, setSelected] = React.useState<IProfileItem | undefined>(undefined);
 
+  /** Lock background scroll while modal is open */
   React.useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setError(undefined);
+    if (selected) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [selected]);
 
-    Promise.all([
-      service.getProfiles(listId),
-      service.getImageMap(imageListId)
-    ])
-      .then(([profiles, imageMap]) => {
-        if (!mounted) return;
-        const merged: IProfileItem[] = [];
-        for (let i = 0; i < profiles.length; i++) {
-          const p = profiles[i];
-          const k = norm(p.name);
-          const photo = imageMap[k];
-          merged.push({ ...p, photoUrl: photo || p.photoUrl });
+  /** Load data + library fallback */
+  React.useEffect(() => {
+    let dead = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const svc = new SpService(context);
+        const base = await svc.getProfiles(listId);
+
+        // Optional photo library map (keyed by Title and filename)
+        let libMap: { [key: string]: string } | null = null;
+        if (imageLibraryId) {
+          try {
+            libMap = await svc.getLibraryPhotoMap(imageLibraryId);
+          } catch (e) { /* silent */ }
         }
-        setItems(merged);
-        setLoading(false);
-      })
-      .catch((e) => { if (!mounted) return; setError(e?.message || 'Load failed'); setLoading(false); });
 
-    return () => { mounted = false; };
-  }, [listId, imageListId, service]);
+        // Enrich with library photo when M365/primary is missing
+        const enriched: IProfileItem[] = [];
+        for (let i = 0; i < base.length; i++) {
+          const it: any = base[i];
+          if ((!it.photoUrl || it.photoUrl === '') && libMap) {
+            const k1 = keyify(it.name);
+            const k2 = keyify((it.upn || '').split('@')[0]);
+            const candidate = (libMap as any)[k1] || (libMap as any)[k2];
+            if (candidate) it.photoUrl = candidate;
+          }
+          enriched.push(it as IProfileItem);
+        }
 
-  const normalized = React.useMemo(() => items.map((i) => ({ ...i, key: i.id })), [items]);
+        if (!dead) setItems(enriched);
+      } catch (e: any) {
+        if (!dead) setError(e && e.message ? e.message : 'Failed to load profiles');
+      } finally {
+        if (!dead) setLoading(false);
+      }
+    })();
+    return () => { dead = true; };
+  }, [listId, imageLibraryId, context]);
 
+  /** Filtering (ES5-safe; no String.includes) */
   const filtered = React.useMemo(() => {
-    const n = searchName.trim().toLowerCase();
-    const r = searchRole.trim().toLowerCase();
+    const a = toNorm(qPeople);
+    const b = toNorm(qDetails);
+    if (!a && !b) return items;
+
     const out: IProfileItem[] = [];
-    for (let i = 0; i < normalized.length; i++) {
-      const it = normalized[i];
-      const byName = !n || ((it.name || '').toLowerCase().indexOf(n) > -1);
-      const byRole = !r || ((it.role || '').toLowerCase().indexOf(r) > -1);
-      if (byName && byRole) out.push(it);
+    for (let i = 0; i < items.length; i++) {
+      const it: any = items[i];
+      const name = toNorm(it.name);
+      const role = toNorm(it.role);
+      const about = toNorm(it.detailsHtml || '');
+      const links = toNorm((it.linkedInUrl || '') + ' ' + (it.companyUrl || '') + ' ' + (it.photoUrl || ''));
+
+      const matchA = !a || name.indexOf(a) > -1 || role.indexOf(a) > -1;
+      const matchB = !b || about.indexOf(b) > -1 || links.indexOf(b) > -1;
+
+      if (matchA && matchB) out.push(items[i]);
     }
     return out;
-    
-  }, [normalized, searchName, searchRole]);
+  }, [items, qPeople, qDetails]);
 
-  // 0 or undefined => show ALL
-  const page = React.useMemo(
-    () => {
-      const cap = (itemsPerPage && itemsPerPage > 0) ? itemsPerPage : filtered.length;
-      return filtered.slice(0, cap);
-    },
-    [filtered, itemsPerPage]
-  );
-
-  const searchStyles: Partial<ISearchBoxStyles> = {
-    root: { borderRadius: 24, border: '1px solid #e5e7eb', height: 40, overflow: 'hidden' },
-    field: { fontSize: 14 },
-    icon: { fontSize: 16 }
-  };
+  /** Page size */
+  const page = React.useMemo(() => {
+    const n = Number(itemsPerPage) || 0;
+    if (!n || n < 0) return filtered;
+    const out: IProfileItem[] = [];
+    for (let i = 0; i < filtered.length && i < n; i++) out.push(filtered[i]);
+    return out;
+  }, [filtered, itemsPerPage]);
 
   return (
-    <div className={styles.wrapper} style={{ ['--accent' as any]: accentColor }}>
+    <div
+      className={styles.wrapper}
+      style={accentColor ? ({ ['--accent' as any]: accentColor } as React.CSSProperties) : undefined}
+    >
       <div className={styles.container}>
         <div className={styles.headingWrap}>
-          <h2 className={styles.heading}>Team Member Profiles</h2>
-          <div className={styles.subtitle}>Get to know more about our team!</div>
+          <h1 className={styles.heading}>{pageTitle || 'Employee Profiles'}</h1>
+          {subTitle ? <p className={styles.subtitle}>{subTitle}</p> : null}
         </div>
 
         <div className={styles.searchRow}>
-          <SearchBox placeholder="Search by name" styles={searchStyles} onChange={(_, v) => setSearchName(v || '')} />
-          <SearchBox placeholder="Search by role/title" styles={searchStyles} onChange={(_, v) => setSearchRole(v || '')} />
+          <input
+            type="text"
+            aria-label="Search by name or role"
+            placeholder="Search by name or role..."
+            value={qPeople}
+            onChange={(e) => setQPeople(e.target.value)}
+            style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #dfe7ef', fontSize: 14 }}
+          />
+          <input
+            type="text"
+            aria-label="Search details"
+            placeholder="Search about, links..."
+            value={qDetails}
+            onChange={(e) => setQDetails(e.target.value)}
+            style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid #dfe7ef', fontSize: 14 }}
+          />
         </div>
+
+        {loading && <div className={styles.loading}>Loading profiles…</div>}
+        {error   && <div className={styles.loading}>Error: {error}</div>}
+
+        {!loading && !error && (
+          <div className={styles.grid}>
+            {page.map((it) => (
+              <MemberCard
+                key={(it as any).id}
+                item={it}
+                active={selected ? ((selected as any).id === (it as any).id) : false}
+                accentColor={accentColor}
+                onClick={setSelected}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {error && (<MessageBar messageBarType={MessageBarType.error}>{error}</MessageBar>)}
-      {loading && (<Spinner size={SpinnerSize.large} label="Loading profiles..." />)}
-
-      {!loading && (
-        <div className={styles.grid}>
-          {page.map((p) => (
-            <MemberCard
-              key={p.id}
-              item={p}
-              onClick={setActive}
-              accentColor={accentColor}
-              active={active?.id === p.id}
-            />
-          ))}
-        </div>
+      {/* True modal via portal to avoid being clipped by the web part container */}
+      {selected && ReactDOM.createPortal(
+        <div className={styles.modalOverlay} onClick={() => setSelected(undefined)}>
+          {/* stopPropagation to allow clicks inside the panel */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <DetailsPanel item={selected} onDismiss={() => setSelected(undefined)} />
+          </div>
+        </div>,
+        document.body
       )}
-
-      <DetailsPanel
-        item={active}
-        isOpen={!!active}
-        onDismiss={() => setActive(undefined)}
-        accentColor={accentColor}
-      />
     </div>
   );
 };
-
-export default MemberProfiles;
