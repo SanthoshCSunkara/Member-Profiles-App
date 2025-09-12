@@ -1,9 +1,9 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
   "solution": {
-    "name": "member-profiles-client-side-solution",
-    "id": "d209510b-4604-46c6-832e-a29a3c175cc9",
-    "version": "5.0.0.0",
+    "name": "Member Profiles App (PortraitCards)",
+    "id": "91d19272-6233-4849-8df9-1c4018e42651",
+    "version": "6.1.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Member Profiles description"
+        "default": "Member Profiles (PortraitCards) Feature"
       },
       "longDescription": {
-        "default": "Member Profiles description"
+        "default": "Member Profiles (PortraitCards) Feature"
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -27,14 +27,14 @@
     },
     "features": [
       {
-        "title": "member-profiles Feature",
+        "title": "Member Profiles (PortraitCards) Feature",
         "description": "The feature that activates elements of the member-profiles solution.",
-        "id": "d12c68ee-521e-4d29-8c9d-460b81aeee1f",
+        "id": "60cf6ae9-e257-4f9a-9c69-9c7f0613dc35",
         "version": "1.0.0.0"
       }
     ]
   },
   "paths": {
-    "zippedPackage": "solution/member-profiles.sppkg"
+    "zippedPackage": "solution/member-profiles-portraitcards.sppkg"
   }
 }

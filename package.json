@@ -1,6 +1,6 @@
 {
-  "name": "member-profiles",
-  "version": "5.0.0",
+  "name": "member-profiles-portraitcards",
+  "version": "6.1.0",
   "private": true,
   "main": "lib/index.js",
   "engines": { "node": ">=18.19.1" },
